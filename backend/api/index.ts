@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../src/app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
-import { IncomingMessage, ServerResponse } from 'http';
+import express, { Request, Response } from 'express';
 
 const expressApp = express();
 let isInitialized = false;
@@ -26,7 +25,7 @@ const bootstrap = async () => {
   isInitialized = true;
 };
 
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
+export default async function handler(req: Request, res: Response) {
   await bootstrap();
-  expressApp(req as any, res as any);
+  expressApp(req, res);
 }

@@ -18,12 +18,18 @@ import { Company } from './companies/company.entity';
       useFactory: (config: ConfigService) => ({
         type: 'mysql',
         host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 3306),
+        port: parseInt(config.get<string>('DB_PORT', '3306'), 10),
         username: config.get<string>('DB_USER', 'root'),
         password: config.get<string>('DB_PASS', ''),
         database: config.get<string>('DB_NAME', 'dygas_db'),
         entities: [User, Company],
-        synchronize: true, // Solo para desarrollo
+        synchronize: true,
+        ssl: config.get('DB_HOST', 'localhost') !== 'localhost'
+          ? { rejectUnauthorized: false }
+          : false,
+        connectTimeout: 60000,
+        retryAttempts: 3,
+        retryDelay: 3000,
       }),
     }),
     DepartmentsModule,
