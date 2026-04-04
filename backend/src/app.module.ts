@@ -15,22 +15,26 @@ import { Company } from './companies/company.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'mysql',
-        host: config.get<string>('DB_HOST', 'localhost'),
-        port: parseInt(config.get<string>('DB_PORT', '3306'), 10),
-        username: config.get<string>('DB_USER', 'root'),
-        password: config.get<string>('DB_PASS', ''),
-        database: config.get<string>('DB_NAME', 'dygas_db'),
-        entities: [User, Company],
-        synchronize: true,
-        ssl: config.get('DB_HOST', 'localhost') !== 'localhost'
-          ? { rejectUnauthorized: false }
-          : false,
-        connectTimeout: 60000,
-        retryAttempts: 3,
-        retryDelay: 3000,
-      }),
+      useFactory: (config: ConfigService) => {
+        const mysqlUrl = config.get<string>('MYSQL_URL');
+        if (mysqlUrl) {
+          // Railway internal connection (no SSL needed)
+          return { type: 'mysql', url: mysqlUrl, entities: [User, Company], synchronize: true };
+        }
+        const host = config.get<string>('DB_HOST', 'localhost');
+        return {
+          type: 'mysql',
+          host,
+          port: parseInt(config.get<string>('DB_PORT', '3306'), 10),
+          username: config.get<string>('DB_USER', 'root'),
+          password: config.get<string>('DB_PASS', ''),
+          database: config.get<string>('DB_NAME', 'dygas_db'),
+          entities: [User, Company],
+          synchronize: true,
+          ssl: host !== 'localhost' ? { rejectUnauthorized: false } : false,
+          connectTimeout: 60000,
+        };
+      },
     }),
     DepartmentsModule,
     CensusModule,
