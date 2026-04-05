@@ -1,24 +1,22 @@
 FROM node:18-alpine
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm @nestjs/cli
+# Install NestJS CLI globally
+RUN npm install -g @nestjs/cli
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files and install dependencies
+COPY package.json ./
+RUN npm install --legacy-peer-deps
 
-# Install ALL dependencies (including devDependencies for build)
-RUN pnpm install
-
-# Copy source code
+# Copy all source files
 COPY . .
 
-# Build the app
-RUN pnpm run build
+# Build TypeScript
+RUN npm run build
 
-# Verify dist was created
-RUN ls -la /app/dist/
+# Confirm dist exists
+RUN ls -la dist/ && echo "Build successful!"
 
 EXPOSE 3000
 
-CMD ["node", "/app/dist/main.js"]
+CMD ["node", "dist/main.js"]
