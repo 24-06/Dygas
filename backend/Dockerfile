@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
@@ -10,7 +10,7 @@ COPY . .
 RUN rm -f tsconfig.build.tsbuildinfo && pnpm run build
 
 # --- Imagen final ---
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
