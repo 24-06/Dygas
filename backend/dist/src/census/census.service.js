@@ -10,8 +10,10 @@ exports.CensusService = void 0;
 const common_1 = require("@nestjs/common");
 const persons_data_1 = require("../data/persons.data");
 let CensusService = class CensusService {
-    censusRecords = [];
-    nextId = 1;
+    constructor() {
+        this.censusRecords = [];
+        this.nextId = 1;
+    }
     verify(documentNumber) {
         const person = persons_data_1.PERSONS_DATA.find((p) => p.documentNumber === documentNumber);
         if (person)

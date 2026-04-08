@@ -12,9 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Company = void 0;
 const typeorm_1 = require("typeorm");
 let Company = class Company {
-    id;
-    name;
-    createdAt;
 };
 exports.Company = Company;
 __decorate([

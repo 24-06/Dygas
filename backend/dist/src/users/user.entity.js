@@ -19,14 +19,6 @@ var UserRole;
     UserRole["EMPLEADO"] = "EMPLEADO";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let User = class User {
-    id;
-    name;
-    email;
-    password;
-    role;
-    companyId;
-    company;
-    createdAt;
 };
 exports.User = User;
 __decorate([

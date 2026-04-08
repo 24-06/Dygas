@@ -18,7 +18,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const company_entity_1 = require("./company.entity");
 let CompaniesService = class CompaniesService {
-    companiesRepository;
     constructor(companiesRepository) {
         this.companiesRepository = companiesRepository;
     }

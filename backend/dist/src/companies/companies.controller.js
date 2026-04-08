@@ -20,7 +20,6 @@ const roles_decorator_1 = require("../auth/roles.decorator");
 const roles_guard_1 = require("../auth/roles.guard");
 const user_entity_1 = require("../users/user.entity");
 let CompaniesController = class CompaniesController {
-    companiesService;
     constructor(companiesService) {
         this.companiesService = companiesService;
     }

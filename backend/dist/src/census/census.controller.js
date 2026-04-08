@@ -16,7 +16,6 @@ exports.CensusController = void 0;
 const common_1 = require("@nestjs/common");
 const census_service_1 = require("./census.service");
 let CensusController = class CensusController {
-    service;
     constructor(service) {
         this.service = service;
     }

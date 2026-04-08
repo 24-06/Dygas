@@ -9,5 +9,5 @@ export declare class DepartmentsService {
         departmentId: number;
         departmentName: string;
         municipalities: import("../data/colombia.data").Municipality[];
-    } | null;
+    };
 }
