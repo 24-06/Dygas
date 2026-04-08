@@ -8,7 +8,9 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN npm run build && ls -la /app/dist/
+RUN npm run build
+
+RUN ls -la /app/dist/ && cat /app/dist/main.js | head -5
 
 EXPOSE 3000
 
