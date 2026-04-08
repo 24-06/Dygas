@@ -18,10 +18,18 @@ import { Company } from './companies/company.entity';
       useFactory: (config: ConfigService) => {
         const mysqlUrl = config.get<string>('MYSQL_URL');
         if (mysqlUrl) {
-          // Railway internal connection (no SSL needed)
-          return { type: 'mysql', url: mysqlUrl, entities: [User, Company], synchronize: true };
+          console.log('🔗 Intentando conectar a DB vía MYSQL_URL...');
+          return {
+            type: 'mysql',
+            url: mysqlUrl,
+            entities: [User, Company],
+            synchronize: true,
+            autoLoadEntities: true,
+            keepConnectionAlive: true,
+          };
         }
         const host = config.get<string>('DB_HOST', 'localhost');
+        console.log(`🔗 Intentando conectar a DB en host: ${host}`);
         return {
           type: 'mysql',
           host,
@@ -31,11 +39,14 @@ import { Company } from './companies/company.entity';
           database: config.get<string>('DB_NAME', 'dygas_db'),
           entities: [User, Company],
           synchronize: true,
+          autoLoadEntities: true,
+          keepConnectionAlive: true,
           ssl: host !== 'localhost' ? { rejectUnauthorized: false } : false,
           connectTimeout: 60000,
         };
       },
     }),
+
     DepartmentsModule,
     CensusModule,
     AuthModule,
