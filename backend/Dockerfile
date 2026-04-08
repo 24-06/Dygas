@@ -1,28 +1,32 @@
-# Etapa de build
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Instalar dependencias necesarias para compilar
-RUN apk add --no-cache python3 make g++
+# Instalar pnpm
+RUN npm install -g pnpm
 
-COPY package*.json ./
-RUN npm ci                    # instala TODAS las deps (incluyendo devDeps)
+COPY package.json pnpm-lock.yaml ./
+
+# Instalar dependencias de compilación + dependencias del proyecto
+RUN apk add --no-cache --virtual .build-deps python3 make g++ \
+    && pnpm install --frozen-lockfile \
+    && apk del .build-deps
 
 COPY . .
-RUN npx nest build            # usa npx para asegurar que encuentra el CLI
+RUN pnpm run build
 
-# Verificar que el build generó el archivo esperado
-RUN ls -la dist/
-
-# Etapa de producción
+# --- Imagen final ---
 FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --omit=dev         # --omit=dev es la forma moderna (reemplaza --only=production)
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=builder /app/dist ./dist
 
-CMD ["node", "dist/main.js"]
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
