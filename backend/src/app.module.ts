@@ -17,8 +17,16 @@ import { Company } from './companies/company.entity';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const mysqlUrl = config.get<string>('MYSQL_URL');
+        
+        // Priorizar variables de Railway (MYSQLHOST, etc.) o MYSQL_URL
+        const host = config.get<string>('MYSQLHOST') || config.get<string>('DB_HOST', 'localhost');
+        const port = parseInt(config.get<string>('MYSQLPORT') || config.get<string>('DB_PORT', '3306'), 10);
+        const username = config.get<string>('MYSQLUSER') || config.get<string>('DB_USER', 'root');
+        const password = config.get<string>('MYSQLPASSWORD') || config.get<string>('DB_PASS', '');
+        const database = config.get<string>('MYSQLDATABASE') || config.get<string>('DB_NAME', 'dygas_db');
+
         if (mysqlUrl) {
-          console.log('🔗 Intentando conectar a DB vía MYSQL_URL...');
+          console.log('🔗 Conectando a la base de datos vía: MYSQL_URL');
           return {
             type: 'mysql',
             url: mysqlUrl,
@@ -28,15 +36,17 @@ import { Company } from './companies/company.entity';
             keepConnectionAlive: true,
           };
         }
-        const host = config.get<string>('DB_HOST', 'localhost');
-        console.log(`🔗 Intentando conectar a DB en host: ${host}`);
+
+        console.log(`🔗 Conectando a la base de datos en: ${host}:${port}`);
+        console.log(`📂 Base de datos: ${database}, Usuario: ${username}`);
+
         return {
           type: 'mysql',
           host,
-          port: parseInt(config.get<string>('DB_PORT', '3306'), 10),
-          username: config.get<string>('DB_USER', 'root'),
-          password: config.get<string>('DB_PASS', ''),
-          database: config.get<string>('DB_NAME', 'dygas_db'),
+          port,
+          username,
+          password,
+          database,
           entities: [User, Company],
           synchronize: true,
           autoLoadEntities: true,
@@ -46,6 +56,7 @@ import { Company } from './companies/company.entity';
         };
       },
     }),
+
 
     DepartmentsModule,
     CensusModule,
