@@ -1,17 +1,28 @@
-FROM node:18-alpine
+# Etapa de build
+FROM node:18-alpine AS builder
+
 WORKDIR /app
 
-RUN npm install -g @nestjs/cli
+# Instalar dependencias necesarias para compilar
+RUN apk add --no-cache python3 make g++
 
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm ci                    # instala TODAS las deps (incluyendo devDeps)
 
 COPY . .
+RUN npx nest build            # usa npx para asegurar que encuentra el CLI
 
-RUN npm run build
+# Verificar que el build generó el archivo esperado
+RUN ls -la dist/
 
-RUN ls -la /app/dist/ && cat /app/dist/main.js | head -5
+# Etapa de producción
+FROM node:18-alpine
 
-EXPOSE 3000
+WORKDIR /app
 
-CMD ["node", "/app/dist/main.js"]
+COPY package*.json ./
+RUN npm ci --omit=dev         # --omit=dev es la forma moderna (reemplaza --only=production)
+
+COPY --from=builder /app/dist ./dist
+
+CMD ["node", "dist/main.js"]
