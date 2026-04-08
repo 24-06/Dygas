@@ -18,44 +18,41 @@ import { Company } from './companies/company.entity';
       useFactory: (config: ConfigService) => {
         const mysqlUrl = config.get<string>('MYSQL_URL');
         
-        // Priorizar variables de Railway (MYSQLHOST, etc.) o MYSQL_URL
+        // Diagnóstico interno
         const host = config.get<string>('MYSQLHOST') || config.get<string>('DB_HOST', 'localhost');
         const port = parseInt(config.get<string>('MYSQLPORT') || config.get<string>('DB_PORT', '3306'), 10);
         const username = config.get<string>('MYSQLUSER') || config.get<string>('DB_USER', 'root');
-        const password = config.get<string>('MYSQLPASSWORD') || config.get<string>('DB_PASS', '');
         const database = config.get<string>('MYSQLDATABASE') || config.get<string>('DB_NAME', 'dygas_db');
 
-        if (mysqlUrl) {
-          console.log('🔗 Conectando a la base de datos vía: MYSQL_URL');
-          return {
-            type: 'mysql',
-            url: mysqlUrl,
-            entities: [User, Company],
-            synchronize: true,
-            autoLoadEntities: true,
-            keepConnectionAlive: true,
-          };
-        }
+        console.log(`📡 Intentando conectar a MySQL en ${host}:${port}...`);
 
-        console.log(`🔗 Conectando a la base de datos en: ${host}:${port}`);
-        console.log(`📂 Base de datos: ${database}, Usuario: ${username}`);
+        const commonConfig = {
+          entities: [User, Company],
+          synchronize: true,
+          autoLoadEntities: true,
+          keepConnectionAlive: true,
+          retryAttempts: 2, // No reintentar eternamente para no bloquear el inicio del log
+          retryDelay: 3000,
+          connectTimeout: 10000,
+        };
+
+        if (mysqlUrl) {
+          return { type: 'mysql', url: mysqlUrl, ...commonConfig };
+        }
 
         return {
           type: 'mysql',
           host,
           port,
           username,
-          password,
+          password: config.get<string>('MYSQLPASSWORD') || config.get<string>('DB_PASS', ''),
           database,
-          entities: [User, Company],
-          synchronize: true,
-          autoLoadEntities: true,
-          keepConnectionAlive: true,
           ssl: host !== 'localhost' ? { rejectUnauthorized: false } : false,
-          connectTimeout: 60000,
+          ...commonConfig,
         };
       },
     }),
+
 
 
     DepartmentsModule,
